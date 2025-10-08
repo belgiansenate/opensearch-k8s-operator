@@ -83,8 +83,8 @@ jobs:
         run: |
           # Update default image repository in values.yaml to point to fork
           sed -i -e 's|repository:.*|repository: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}|' charts/opensearch-operator/values.yaml
-          # Use commit SHA as image tag
-          sed -i -e 's|tag:.*|tag: "ci-package-publishing-${{ github.sha }}"|' charts/opensearch-operator/values.yaml
+          # Use latest tag to match pushed Docker image
+          sed -i -e 's|tag:.*|tag: "latest"|' charts/opensearch-operator/values.yaml
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
