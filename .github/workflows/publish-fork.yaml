@@ -79,12 +79,16 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Install yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
       - name: Update chart with fork image
         run: |
-          # Update default image repository in values.yaml to point to fork
-          sed -i -e 's|repository:.*|repository: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}|' charts/opensearch-operator/values.yaml
-          # Use latest tag to match pushed Docker image
-          sed -i -e 's|tag:.*|tag: "latest"|' charts/opensearch-operator/values.yaml
+          # Update only manager.image, not kubeRbacProxy.image
+          yq eval '.manager.image.repository = "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"' -i charts/opensearch-operator/values.yaml
+          yq eval '.manager.image.tag = "latest"' -i charts/opensearch-operator/values.yaml
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
